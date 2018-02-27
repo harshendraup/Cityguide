@@ -9,28 +9,40 @@ import {
 
 import MapView from 'react-native-maps';
 import { StackNavigator} from 'react-navigation';
-import { Container, DeckSwiper, Card, CardItem, Left } from 'native-base';
+import { Container, DeckSwiper, Card, CardItem } from 'native-base';
+import Overlay from 'react-native-modal-overlay';
+import { Dimensions } from 'react-native';
+import Swiper from 'react-native-swiper';
+import SwipeALot from 'react-native-swipe-a-lot';
+var {height, width} = Dimensions.get('window');
 
 export default class LocationDetails extends Component<{}> {
  
   static navigationOptions = ({navigation}) => ({title:`${navigation.state.params.data.city}`});
-
+  constructor(props) {
+    super(props);
+    this.state = {
+      placespress: false,
+    }
+  }
   render() {
-    return (
-      <View style={styles.container}>
+    const {latitude,longitude} = this.props.navigation.state.params.data;
+    if (this.state.placespress) {
+      return (
+        <View style={styles.container}>
         <MapView
           style={styles.map}
           initialRegion={{
-            latitude: this.props.navigation.state.params.data.latitude,
-            longitude: this.props.navigation.state.params.data.longitude,
+            latitude: latitude,
+            longitude: longitude,
             latitudeDelta:0.0434,
             longitudeDelta:0.0431,
           }}
         >
           <MapView.Marker
             coordinate={{
-              latitude: this.props.navigation.state.params.data.latitude,
-              longitude: this.props.navigation.state.params.data.longitude,
+              latitude: latitude,
+              longitude: longitude,
             }}
           />
         </MapView>
@@ -41,7 +53,7 @@ export default class LocationDetails extends Component<{}> {
                 <Card style={{ elevation: 1 }}>
                   <CardItem style={styles.locationplaces}>
                     
-                    <Text style={styles.citytext}>{item.placename} {item.no}/3</Text>                  
+                    <Text style={styles.citytext}>{item.placename} {    item.no}/3</Text>                  
                     <Text style={styles.desctext}>{item.desc}</Text> 
                     <View style={styles.container1}>
                       <TouchableOpacity>
@@ -68,7 +80,90 @@ export default class LocationDetails extends Component<{}> {
                           source={require('./direction.png')} 
                         />
                       </TouchableOpacity>
-                      <Text>{item.no}/3</Text>
+                      <TouchableOpacity>
+                        <Image
+                          style={styles.uber} 
+                          source={require('./uber.png')} 
+                        />
+                      </TouchableOpacity>
+                    </View>
+                  </CardItem>
+                </Card>
+              }>
+            </DeckSwiper>
+          </View>
+        </Container>
+        <Overlay 
+          visible={this.state.placespress}
+          onClose={this.viewimageclose}
+          containerStyle={{backgroundColor: 'rgba(37, 8, 10, 0.78)'}}
+          childrenWrapperStyle={{backgroundColor: '#eee'}}
+          closeOnTouchOutside animationType="zoomIn"
+          animationDuration={500}>
+          <SwipeALot>
+            <View style={styles.imageaccess}>
+              <Text>This is slide 1</Text>
+            </View>
+            <View style={styles.imageaccess}>
+              <Text>This is slide 2</Text>
+            </View>  
+          </SwipeALot>   
+        </Overlay> 
+      </View> 
+      );
+    }
+    return (
+      <View style={styles.container}>
+        <MapView
+          style={styles.map}
+          initialRegion={{
+            latitude: latitude,
+            longitude: longitude,
+            latitudeDelta:0.0434,
+            longitudeDelta:0.0431,
+          }}
+        >
+          <MapView.Marker
+            coordinate={{
+              latitude: latitude,
+              longitude: longitude,
+            }}
+          />
+        </MapView>
+        <Container>
+          <View>
+            <DeckSwiper dataSource={this.props.navigation.state.params.data.places}
+              renderItem={(item,index)=>
+                <Card style={{ elevation: 1 }}>
+                  <CardItem style={styles.locationplaces}>
+                    
+                    <Text style={styles.citytext}>{item.placename} {    item.no}/3</Text>                  
+                    <Text style={styles.desctext}>{item.desc}</Text> 
+                    <View style={styles.container1}>
+                      <TouchableOpacity onPress={this.viewimage}>
+                        <Image style={styles.places}
+                        source={{uri : item.img1}} 
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity  onPress={this.viewimage}>
+                        <Image style={styles.places}
+                        source={{uri : item.img2}} 
+                        />
+                      </TouchableOpacity>
+                      <TouchableOpacity onPress={this.viewimage}>
+                        <Image style={styles.places}
+                        source={{uri : item.img3}} 
+                        />
+                      </TouchableOpacity>
+                    </View>
+                    
+                    <View style={styles.container1}>
+                      <TouchableOpacity>
+                        <Image
+                          style={styles.direction} 
+                          source={require('./direction.png')} 
+                        />
+                      </TouchableOpacity>
                       <TouchableOpacity>
                         <Image
                           style={styles.uber} 
@@ -84,6 +179,16 @@ export default class LocationDetails extends Component<{}> {
         </Container> 
       </View>
     );
+  }
+  viewimage =() => {
+    this.setState({
+      placespress: true, 
+    });
+  }
+  viewimageclose =() => {
+    this.setState({
+      placespress: false, 
+    });
   }
 }
 
@@ -112,7 +217,7 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     bottom: 0,
-    width: 358,
+    width: width-0,
     height:240 
   }, 
   container1: {
@@ -157,5 +262,11 @@ const styles = StyleSheet.create({
     height: 400,
     width:  250,
     padding: 5
-  },  
+  },
+  imageaccess: {
+    width: width-75,
+    height:240
+  },
+  wrapper: {
+  }, 
 });
